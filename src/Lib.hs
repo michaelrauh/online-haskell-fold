@@ -34,7 +34,7 @@ makePrevMapping :: String -> Map.Map String (Set.Set String)
 makePrevMapping str = foldr (addWordToCorr . swap) Map.empty (clean str)
 
 makePhrases :: String -> Set.Set [String]
-makePhrases input = Set.fromList (phrases (concatMap stripAndSplit (toLowerSentences input)))
+makePhrases input = Set.fromList $ concatMap (phrases . stripAndSplit) (toLowerSentences input)
 
 toLowerSentences :: String -> [String]
 toLowerSentences input = splitOn "." (lower input)
