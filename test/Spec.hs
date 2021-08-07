@@ -5,11 +5,18 @@ import Lib
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 
-result = makeNextMapping "First, second. Third - fourth\nfifth. first third"
+inputString = "First, second. Third - fourth\nfifth. first third"
+
+result = makeNextMapping inputString
 expected = Map.fromList [("first", Set.fromList ["second", "third"]), ("third", Set.fromList ["fourth"]), ("fourth", Set.fromList ["fifth"])]
 testNext = TestCase $ assertEqual "makes next mapping but drops across periods and strips caps and punctuation" expected result
 
-testlist = TestList [TestLabel "nextMapping" testNext
+expectedPrev = Map.fromList [("fifth", Set.fromList ["fourth"]), ("fourth", Set.fromList ["third"]), ("second", Set.fromList ["first"]), ("third", Set.fromList ["first"])]
+resultPrev = makePrevMapping inputString
+testPrev = TestCase $ assertEqual "makes prev mapping in the same style as next mapping" expectedPrev resultPrev
+
+testlist = TestList [TestLabel "nextMapping" testNext,
+                    TestLabel "prevMapping" testPrev
                     ]
 
 main :: IO ()
