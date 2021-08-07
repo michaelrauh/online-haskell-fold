@@ -22,12 +22,7 @@ makeNextMapping :: String -> Map.Map String (Set.Set String)
 makeNextMapping str = let words = clean str in foldr addWordToCorr Map.empty words
 
 clean :: String -> [(String, String)]
-clean input = let 
-    lowered = lower input
-    sentences = splitOn ". " lowered
-    clean_sentences = map stripPunctuation sentences
-    clean_words = map words clean_sentences
-    in concatMap windows clean_words
+clean input = concatMap ((windows . words) . stripPunctuation) (splitOn ". " (lower input))
 
 addWordToCorr :: (String, String) -> Map.Map String (Set.Set String) -> Map.Map String (Set.Set String)
 addWordToCorr (f, s) acc = Map.unionWith Set.union acc (Map.fromList [(f, Set.singleton s)])
