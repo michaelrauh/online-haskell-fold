@@ -19,9 +19,14 @@ expectedPhrases = Set.fromList [["first"], ["second"], ["first", "second"], ["th
 resultPhrases = makePhrases inputString
 testPhrases = TestCase $ assertEqual "makes phrase set" expectedPhrases resultPhrases
 
+expectedVocabulary = ["fifth", "first", "fourth", "second", "third"]
+resultVocabulary = makeVocabulary inputString
+testVocabulary = TestCase $ assertEqual "makes vocab list" expectedVocabulary resultVocabulary
+
 testlist = TestList [TestLabel "nextMapping" testNext,
                     TestLabel "prevMapping" testPrev,
-                    TestLabel "phrases" testPhrases
+                    TestLabel "phrases" testPhrases,
+                    TestLabel "vocabulary" testVocabulary
                     ]
 
 main :: IO ()

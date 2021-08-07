@@ -1,10 +1,10 @@
 module Lib
-    ( makeNextMapping, makePrevMapping, makePhrases
+    ( makeNextMapping, makePrevMapping, makePhrases, makeVocabulary
     ) where
 
 import qualified Data.Map as Map
 import qualified Data.Set as Set
-import Data.List (tails, inits)
+import Data.List (tails, inits, nub, sort)
 import Data.List.Split ( splitOn )
 import Data.Char ( toLower )
 import Data.Tuple ( swap )
@@ -41,3 +41,6 @@ toLowerSentences input = splitOn "." (lower input)
 
 phrases :: [String] -> [[String]]
 phrases = concatMap (tail . inits) . tails
+
+makeVocabulary :: String -> [String]
+makeVocabulary = sort . nub . stripAndSplit . lower
