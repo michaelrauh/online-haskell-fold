@@ -1,18 +1,15 @@
 import Test.HUnit
 import System.Exit
+import Lib
 
-testSum = TestCase $ assertEqual "10 + 5 = 15" 15 (10 + 5)
+import qualified Data.Map as Map
+import qualified Data.Set as Set
 
-testProd = TestCase $ assertEqual "10 * 15" 150 (10 * 15)
+result = makeNextMapping "a b"
+expected = Map.fromList [("a", Set.fromList ["b"])]
+testNext = TestCase $ assertEqual "makes next mapping" expected result
 
-testPred = TestCase $ assertBool "10 > 5" (10 > 5)
-
-testFailure = TestCase $ assertEqual "It will fail 10 + 2 = 15" (10 + 2) 15  
-
-testlist = TestList [TestLabel "testSum" testSum,
-                     TestLabel "testPred" testPred,
-                     TestLabel "testFailure" testFailure,
-                     TestLabel "testProd" testProd                    
+testlist = TestList [TestLabel "nextMapping" testNext
                     ]
 
 main :: IO ()
