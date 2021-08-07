@@ -15,6 +15,9 @@ expectedPrev = Map.fromList [("fifth", Set.fromList ["fourth"]), ("fourth", Set.
 resultPrev = makePrevMapping inputString
 testPrev = TestCase $ assertEqual "makes prev mapping in the same style as next mapping" expectedPrev resultPrev
 
+expectedPhrases = Set.fromList [["first"], ["second"], ["first", "second"], ["third"], ["fourth"], ["fifth"], ["third", "fourth"], ["fourth", "fifth"], ["third", "fourth", "fifth"], ["first", "third"]]
+resultPhrases = makePhrases inputString
+testPhrases = TestCase $ assertEqual "makes phrase set" expectedPhrases resultPhrases
 testlist = TestList [TestLabel "nextMapping" testNext,
                     TestLabel "prevMapping" testPrev
                     ]
