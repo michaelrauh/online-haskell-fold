@@ -19,7 +19,7 @@ lower :: String -> String
 lower = map toLower
 
 makeNextMapping :: String -> Map.Map String (Set.Set String)
-makeNextMapping str = let words = clean str in foldr addWordToCorr Map.empty words
+makeNextMapping str = foldr addWordToCorr Map.empty (clean str)
 
 clean :: String -> [(String, String)]
 clean input = concatMap ((windows . words) . stripPunctuation) (splitOn ". " (lower input))
