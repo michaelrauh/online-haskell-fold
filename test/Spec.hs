@@ -5,9 +5,9 @@ import Lib
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 
-result = makeNextMapping "a b"
-expected = Map.fromList [("a", Set.fromList ["b"])]
-testNext = TestCase $ assertEqual "makes next mapping" expected result
+result = makeNextMapping "First, second. Third - fourth\nfifth. first third"
+expected = Map.fromList [("first", Set.fromList ["second", "third"]), ("third", Set.fromList ["fourth"]), ("fourth", Set.fromList ["fifth"])]
+testNext = TestCase $ assertEqual "makes next mapping but drops across periods and strips caps and punctuation" expected result
 
 testlist = TestList [TestLabel "nextMapping" testNext
                     ]
