@@ -1,6 +1,6 @@
 module WordEaterSpec (spec) where
 
-import WordEater ( wordToUniqueAnswer, Answer(Answer) ) 
+import WordEater ( wordToUniqueAnswer, Answer(Answer) )
 import Config ( makeConfig )
 import qualified Data.Map as Map
 import qualified Data.Set as Set
