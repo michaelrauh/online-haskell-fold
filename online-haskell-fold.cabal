@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 5aa025c0bbe0fcc62cb4648be6046fac8595a60a6539e0bbf01354e259e11e86
+-- hash: a3e986a0ccbbe6d3447747181a2bd9ec6e7b06575b0df912705f5720cad2b78f
 
 name:           online-haskell-fold
 version:        0.1.0.0
@@ -29,6 +29,7 @@ library
   exposed-modules:
       Config
       ConfigUtil
+      WordEater
   other-modules:
       Paths_online_haskell_fold
   hs-source-dirs:
@@ -60,6 +61,7 @@ test-suite online-haskell-fold-test
   main-is: Spec.hs
   other-modules:
       ConfigUtilSpec
+      WordEaterSpec
       Paths_online_haskell_fold
   hs-source-dirs:
       test

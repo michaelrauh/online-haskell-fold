@@ -1,8 +1,8 @@
 module ConfigUtilSpec (spec) where
 
-import Test.Hspec
-import System.Exit
+import Test.Hspec ( describe, it, shouldBe, Spec )
 import ConfigUtil
+    ( makeNextMapping, makePhrases, makePrevMapping, makeVocabulary )
 
 import qualified Data.Map as Map
 import qualified Data.Set as Set

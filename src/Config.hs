@@ -1,7 +1,5 @@
-module Config
-  ( makeConfig
-  )
-where
+module Config (Config (Config, next, prev, phrases, vocab), makeConfig) where
+
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import ConfigUtil
@@ -15,4 +13,4 @@ data Config = Config {
 } deriving Show
 
 makeConfig :: String -> Config
-makeConfig s = Config {next=makeNextMapping s, prev=makePrevMapping s, phrases=makePhrases s, vocab=makeVocabulary s}
+makeConfig s = Config {next=makeNextMapping s, prev=makePrevMapping s, phrases=makePhrases s, vocab=makeVocabulary s}  
