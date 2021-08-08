@@ -1,4 +1,4 @@
-module Lib
+module ConfigUtil
     ( makeNextMapping, makePrevMapping, makePhrases, makeVocabulary
     ) where
 

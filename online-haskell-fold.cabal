@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2a2116ece6db7b769a99188c50a0fb97574a589b4b4cb2d816b89b9d32bc0faf
+-- hash: 8d9c1448b17f96082bfa568c5673e7b99b86e3ac8d33d6c66c0fab4e1e6666ec
 
 name:           online-haskell-fold
 version:        0.1.0.0
@@ -27,15 +27,15 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      ConfigUtil
   other-modules:
       Paths_online_haskell_fold
   hs-source-dirs:
       src
   build-depends:
-      HUnit
-    , base >=4.7 && <5
+      base >=4.7 && <5
     , containers
+    , hspec
     , split
   default-language: Haskell2010
 
@@ -47,9 +47,9 @@ executable online-haskell-fold-exe
       app
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      HUnit
-    , base >=4.7 && <5
+      base >=4.7 && <5
     , containers
+    , hspec
     , online-haskell-fold
     , split
   default-language: Haskell2010
@@ -58,14 +58,15 @@ test-suite online-haskell-fold-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      ConfigUtilSpec
       Paths_online_haskell_fold
   hs-source-dirs:
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      HUnit
-    , base >=4.7 && <5
+      base >=4.7 && <5
     , containers
+    , hspec
     , online-haskell-fold
     , split
   default-language: Haskell2010

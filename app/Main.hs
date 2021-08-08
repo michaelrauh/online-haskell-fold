@@ -1,6 +1,6 @@
 module Main where
 
-import Lib
+import ConfigUtil
 
 main :: IO ()
 main = putStrLn "not implemented"
