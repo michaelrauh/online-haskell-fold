@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8d9c1448b17f96082bfa568c5673e7b99b86e3ac8d33d6c66c0fab4e1e6666ec
+-- hash: 5aa025c0bbe0fcc62cb4648be6046fac8595a60a6539e0bbf01354e259e11e86
 
 name:           online-haskell-fold
 version:        0.1.0.0
@@ -27,6 +27,7 @@ source-repository head
 
 library
   exposed-modules:
+      Config
       ConfigUtil
   other-modules:
       Paths_online_haskell_fold
