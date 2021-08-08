@@ -7,11 +7,18 @@ import Data.List ( nub )
 
 data Answer = Answer String String String String deriving (Show)
 
-instance Eq Answer where 
-    (Answer a b c d) == (Answer a' b' c' d') = 
-        a == a && 
-        d == d && 
-        (b == b' && c == c') || 
+newtype Ortho = Ortho{nodes :: [Node]}
+
+data Node = Node
+  { name :: String,
+    distance :: Integer
+  }
+
+instance Eq Answer where
+    (Answer a b c d) == (Answer a' b' c' d') =
+        a == a &&
+        d == d &&
+        (b == b' && c == c') ||
         (b == c' && c == b')
 
 wordToAnswer :: Config -> String -> [Answer]
@@ -25,3 +32,12 @@ wordToAnswer (Config next prev _ _) d = do
 
 wordToUniqueAnswer :: Config -> String -> [Answer]
 wordToUniqueAnswer config word = nub $ wordToAnswer config word
+
+eatWord :: Config -> String -> [Ortho]
+eatWord conf cur = map fromAnswer $ wordToUniqueAnswer conf cur
+
+fromAnswer :: Answer -> Ortho
+fromAnswer (Answer a b c d) = Ortho [Node a 0, Node b 1, Node c 1, Node d 2]
+
+origin :: Ortho -> String
+origin = name . head . nodes
