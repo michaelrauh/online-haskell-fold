@@ -19,10 +19,10 @@ spec = do
       let result = getDimensions $ head $ eatWord (makeConfig "a b c d a c b d") "d"
           expected = [1, 2, 1]
       result `shouldBe` expected
-    -- it "allows seeing what is one away from origin" $ do
-    --   let result = hop $ head $ eatWord (makeConfig "a b c d a c b d") "d"
-    --       expected = Set.fromList ["b", "c"]
-    --   result `shouldBe` expected
+    it "allows seeing what is one away from origin" $ do
+      let result = hop $ head $ eatWord (makeConfig "a b c d a c b d") "d"
+          expected = Set.fromList ["b", "c"]
+      result `shouldBe` expected
     -- it "allows unraveling based upon a hop direction" $ do
     --   let result = unravel (head $ eatWord (makeConfig "a b c d a c b d") "d") "b"
     --       expected = ["a", "b", "c", "d"]

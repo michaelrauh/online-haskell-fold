@@ -1,4 +1,4 @@
-module Ortho (eatWord, getOrigin, getDimensions) where
+module Ortho (eatWord, getOrigin, getDimensions, hop) where
 
 import Config (Config (Config))
 import Data.List (group, sort)
@@ -40,9 +40,8 @@ go (Node _ distance neighbors) hopDirection =
   case Map.lookup hopDirection neighbors of Nothing -> [distance]
                                             Just node -> distance : go node hopDirection
 
-
--- hop :: Ortho -> Set.Set String
--- hop (Ortho nodes) = Set.fromList $ name <$> filter ((1 ==) . distance) nodes
+hop :: Ortho -> Set.Set String
+hop (Ortho (Node _ _ neighbor)) = Set.fromList $ Map.keys neighbor
 
 -- isBase :: Ortho -> Bool
 -- isBase = error "Not Implemented"
