@@ -39,3 +39,7 @@ spec = do
       let result = lhsCenter (head $ eatWord (makeConfig "a b c d a c b d") "d") "c"
           expected = ["a", "b"]
       result `shouldBe` expected
+    it "allows unraveling based upon a hop direction for the rhs center" $ do
+      let result = rhsCenter (head $ eatWord (makeConfig "a b c d a c b d") "d") "c"
+          expected = ["c", "d"]
+      result `shouldBe` expected
