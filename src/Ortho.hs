@@ -1,4 +1,4 @@
-module Ortho (eatWord, getOrigin, getDimensions, hop, unravel, diagonals, lhsCenter, rhsCenter, phrases) where
+module Ortho (eatWord, getOrigin, getDimensions, hop, unravel, diagonals, lhsCenter, rhsCenter, phrases, isBase) where
 
 import Config (Config (Config))
 import Data.List (group, sort, groupBy)
@@ -48,8 +48,8 @@ randomHop = head . Map.keys . unravelNeighbor
 hop :: Ortho -> Set.Set String
 hop (Ortho (Node _ _ neighbor _ _ _)_) = Set.fromList $ Map.keys neighbor
 
--- isBase :: Ortho -> Bool
--- isBase = error "Not Implemented"
+isBase :: Ortho -> Bool
+isBase ortho = all (2==) $ length <$> Set.toList (phrases ortho)
 
 unravel :: Ortho -> String -> [String]
 unravel (Ortho origin _) hopDirection = fst <$> go origin hopDirection

@@ -47,3 +47,7 @@ spec = do
       let result = phrases (head $ eatWord (makeConfig "a b c d a c b d") "d")
           expected = Set.fromList [["a", "b"], ["c", "d"], ["a", "c"], ["b", "d"]]
       result `shouldBe` expected
+    it "detects a base dimension shape" $ do
+      let result = isBase (head $ eatWord (makeConfig "a b c d a c b d") "d")
+          expected = True
+      result `shouldBe` expected
