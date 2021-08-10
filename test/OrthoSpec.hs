@@ -35,3 +35,7 @@ spec = do
       let result = diagonals (head $ eatWord (makeConfig "a b c d a c b d") "d")
           expected = [Set.fromList ["a"], Set.fromList ["c", "b"], Set.fromList ["d"]]
       result `shouldBe` expected
+    it "allows unraveling based upon a hop direction for the lhs center" $ do
+      let result = lhsCenter (head $ eatWord (makeConfig "a b c d a c b d") "d") "c"
+          expected = ["a", "b"]
+      result `shouldBe` expected
