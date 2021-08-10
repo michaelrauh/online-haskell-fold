@@ -43,3 +43,7 @@ spec = do
       let result = rhsCenter (head $ eatWord (makeConfig "a b c d a c b d") "d") "c"
           expected = ["c", "d"]
       result `shouldBe` expected
+    it "allows unraveling into a set of phrases" $ do
+      let result = phrases (head $ eatWord (makeConfig "a b c d a c b d") "d")
+          expected = Set.fromList [["a", "b"], ["c", "d"], ["a", "c"], ["b", "d"]]
+      result `shouldBe` expected
