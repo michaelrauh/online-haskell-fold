@@ -3,7 +3,7 @@ module Config (Config (Config, next, prev, phrases, vocab), makeConfig) where
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import ConfigUtil
-    ( makeNextMapping, makePrevMapping, makePhrases, makeVocabulary )
+    (makeNextMapping, makePrevMapping, makePhrases, makeVocabulary)
 
 data Config = Config {
     next :: Map.Map String (Set.Set String),

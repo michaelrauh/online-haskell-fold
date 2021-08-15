@@ -24,6 +24,7 @@ dependencies:
 - hspec
 - containers
 - split
+- ixset
 
 library:
   source-dirs: src

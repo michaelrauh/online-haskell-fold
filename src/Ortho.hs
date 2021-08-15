@@ -1,25 +1,18 @@
-module Ortho (eatWord, getOrigin, getDimensions, hop, unravel, diagonals, lhsCenter, rhsCenter, phrases, isBase) where
+module Ortho (Ortho (..), eatWord, fromAnswer, getOrigin, getDimensions, hop, getDiagonals) where
 
 import Config (Config (Config))
-import Data.List (group, sort, groupBy)
-import Data.Set as Set (Set, fromList, toList)
-import Data.Map as Map (Map, singleton, fromList, empty, lookup, keys, (!))
+import Data.List (group, sort, groupBy, subsequences, nubBy, sortBy)
+import Data.Set as Set (Set, fromList, toList, size)
+import Data.Map as Map (Map, singleton, fromList, empty, lookup, keys, (!), elems)
 import WordEater ( Answer(..), wordToUniqueAnswer )
+import Data.Function (on)
 
-data Ortho = Ortho
-  {
-    origin :: Node,
-    phraseOrigins :: [Node]
-  }
+newtype Ortho = Ortho{origin :: Node}
 
 data Node = Node
   {
     name :: String,
-    distance :: Int,
-    unravelNeighbor :: Map.Map String Node,
-    lhsNeighbor :: Map.Map String Node,
-    rhsNeighbor :: Map.Map String Node,
-    phraseNeighbor :: Map.Map Int Node
+    neighbors :: Map.Map Int Node
   }
 
 eatWord :: Config -> String -> [Ortho]
@@ -27,70 +20,55 @@ eatWord conf cur = fromAnswer <$> wordToUniqueAnswer conf cur
 
 fromAnswer :: Answer -> Ortho
 fromAnswer (Answer a b c d) = let
-  nodeA = Node a 0 (Map.fromList [(b, nodeB), (c, nodeC)]) (Map.fromList [(b, nodeC), (c, nodeB)]) Map.empty (Map.fromList [(0, nodeB), (2, nodeC)])
-  nodeB = Node b 1 (Map.fromList [(b, nodeC), (c, nodeD)]) Map.empty (Map.fromList [(b, nodeD)]) (Map.fromList [(3, nodeD)])
-  nodeC = Node c 1 (Map.fromList [(b, nodeD), (c, nodeB)]) Map.empty (Map.fromList [(c, nodeD)]) (Map.fromList [(1, nodeD)])
-  nodeD = Node d 2 Map.empty Map.empty Map.empty Map.empty
-  in Ortho nodeA [nodeA, nodeC, nodeA, nodeB]
+  nodeA = Node a (Map.fromList [(0, nodeB), (1, nodeC)])
+  nodeB = Node b (Map.fromList [(1, nodeD)])
+  nodeC = Node c (Map.fromList [(0, nodeD)])
+  nodeD = Node d Map.empty
+  in Ortho nodeA
 
 getOrigin :: Ortho -> String
 getOrigin = name . origin
 
 getDimensions :: Ortho -> [Int]
-getDimensions (Ortho origin _) = let
-  hopDirection = randomHop origin
-  numbers = snd <$> go origin hopDirection
-  in map length $ group $ sort numbers
-
-randomHop :: Node -> String
-randomHop = head . Map.keys . unravelNeighbor
+getDimensions ortho = map length $ getDiagonals ortho
 
 hop :: Ortho -> Set.Set String
-hop (Ortho (Node _ _ neighbor _ _ _)_) = Set.fromList $ Map.keys neighbor
+hop (Ortho (Node _ neighbors)) = Set.fromList $ map name $ Map.elems neighbors
 
-isBase :: Ortho -> Bool
-isBase ortho = all (2==) $ length <$> Set.toList (phrases ortho)
+getDiagonals :: Ortho -> [Set.Set String]
+getDiagonals ortho@(Ortho node) = let
+  paths = getDiagonalPaths ortho
+  zipped = zip (map length paths) (map (go node) paths)
+  grouped = groupBy ((==) `on` fst) zipped
+  in map (Set.fromList . map snd) grouped
 
-unravel :: Ortho -> String -> [String]
-unravel (Ortho origin _) hopDirection = fst <$> go origin hopDirection
+getDiagonalPaths :: Ortho -> [[Int]]
+getDiagonalPaths ortho = let
+  pathToBottomRightCorner = findPathToBottomRightCorner ortho
+  paths = subsequences pathToBottomRightCorner
+  uniques = nubBy (\x y -> sort x == sort y) paths
+  comparator = (compare `on` length)
+  answer = sortBy comparator uniques
+  in answer
 
-go :: Node -> String -> [(String, Int)]
-go (Node name distance neighbors _ _ _) hopDirection =
-  case Map.lookup hopDirection neighbors of
-    Nothing -> [(name, distance)]
-    Just node -> (name, distance) : go node hopDirection
+findPathToBottomRightCorner :: Ortho -> [Int]
+findPathToBottomRightCorner (Ortho node@(Node _ neighbors)) = let
+  axes = Map.keys neighbors
+  in eatAxesToNode node axes
 
-goLHS :: Node -> String -> [(String, Int)]
-goLHS (Node name distance _ neighbors _ _) hopDirection =
-  case Map.lookup hopDirection neighbors of
-    Nothing -> [(name, distance)]
-    Just node -> (name, distance) : goLHS node hopDirection
+eatAxesToNode :: Node -> [Int] -> [Int]
+eatAxesToNode node@(Node _ neighbors) [] = []
+eatAxesToNode node@(Node _ neighbors) [direction] = replicate (distanceToEdge node direction) direction
+eatAxesToNode node@(Node _ neighbors) (direction : rest) = let
+  f = replicate (distanceToEdge node direction) direction
+  s = eatAxesToNode node rest
+  in f ++ s
 
-goRHS :: Node -> String -> [(String, Int)]
-goRHS (Node name distance _ _ neighbors _) hopDirection =
-  case Map.lookup hopDirection neighbors of
-    Nothing -> [(name, distance)]
-    Just node -> (name, distance) : goRHS node hopDirection
+distanceToEdge :: Node -> Int -> Int
+distanceToEdge (Node _ neighbors) direction = case Map.lookup direction neighbors of
+  Just node -> 1 + distanceToEdge node direction
+  Nothing -> 0
 
-diagonals :: Ortho -> [Set.Set String]
-diagonals (Ortho origin _) = let
-  hopDirection = randomHop origin
-  pairs = go origin hopDirection
-  in map (Set.fromList . map fst) (groupBy ((. snd) . (==) . snd) pairs)
-
-lhsCenter :: Ortho -> String -> [String]
-lhsCenter (Ortho origin _) hopDirection = fst <$> goLHS origin hopDirection
-
-rhsCenter :: Ortho -> String -> [String]
-rhsCenter (Ortho (Node _ _ neighbor _ _ _)_) hopDirection = let
-  start = neighbor Map.! hopDirection
-  in fst <$> goRHS start hopDirection
-
-phrases :: Ortho -> Set.Set [String]
-phrases (Ortho _ neighborOrigins) = Set.fromList (fmap (fmap fst) (goPhrases <$> zip [0..] neighborOrigins))
-
-goPhrases :: (Int, Node) -> [(String, Int)]
-goPhrases (hopDirection, Node name distance _ _ _ neighbors) =
-  case Map.lookup hopDirection neighbors of
-    Nothing -> [(name, distance)]
-    Just node -> (name, distance) : goPhrases (hopDirection, node)
+go :: Node -> [Int] -> String
+go (Node name _) [] = name
+go (Node _ neighbors) (f : rest) = go (neighbors Map.! f) rest
