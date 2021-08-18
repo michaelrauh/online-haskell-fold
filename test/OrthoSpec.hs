@@ -4,7 +4,7 @@ import Config (makeConfig)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import Test.Hspec (Spec, describe, it, shouldBe)
-import Ortho (eatWord, empty, findWithMatchingDimsAndHopToOrigin, findWithMatchingDimsAndOriginProjectingBackward, findWithMatchingDimsAndOriginProjectingForward, findWithMatchingDimsAndOriginToHop, insert, size)
+import Ortho (eatWord, empty, findWithMatchingHopToOrigin, findWithMatchingOriginProjectingBackward, findWithMatchingOriginProjectingForward, findWithMatchingOriginToHop, insert, size)
 
 {-# ANN module "HLint: ignore Redundant do" #-}
 {-# ANN module "HLint: ignore Reduce duplication" #-}
@@ -21,7 +21,7 @@ spec = do
           original = head $ eatWord config "d"
           new = head $ eatWord config "h"
           store = insert empty new
-          result = findWithMatchingDimsAndOriginProjectingForward config store original
+          result = findWithMatchingOriginProjectingForward config store original
           expected = Set.singleton new
       result `shouldBe` expected
     it "searching for orthos by dims and origin over a projection when looking for LHS" $ do
@@ -29,7 +29,7 @@ spec = do
           new = head $ eatWord config "d"
           original = head $ eatWord config "h"
           store = insert empty new
-          result = findWithMatchingDimsAndOriginProjectingBackward config store original
+          result = findWithMatchingOriginProjectingBackward config store original
           expected = Set.singleton new
       result `shouldBe` expected
     it "searching for orthos by dims by matching a hop to an origin RHS" $ do
@@ -37,7 +37,7 @@ spec = do
           new = head $ eatWord config "f"
           original = head $ eatWord config "d"
           store = insert empty new
-          result = findWithMatchingDimsAndHopToOrigin store original
+          result = findWithMatchingHopToOrigin store original
           expected = Set.singleton new
       result `shouldBe` expected
     it "searching for orthos by dims by matching an origin to a hop LHS" $ do
@@ -45,7 +45,7 @@ spec = do
           original = head $ eatWord config "f"
           new = head $ eatWord config "d"
           store = insert empty new
-          result = findWithMatchingDimsAndOriginToHop store original
+          result = findWithMatchingOriginToHop store original
           expected = Set.singleton new
       result `shouldBe` expected
     it "checks to make sure diagonals don't match up for all rotations. Has a left to right bias" $ do
@@ -53,7 +53,7 @@ spec = do
           original = head $ eatWord config "f"
           new = head $ eatWord config "d"
           store = insert empty new
-          result = findWithMatchingDimsAndOriginToHop store original
+          result = findWithMatchingOriginToHop store original
           expected = Set.singleton new
       result `shouldBe` expected
 
