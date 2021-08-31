@@ -1,101 +1,70 @@
-module Ortho (Ortho (..), eatWord, Ortho.size, Ortho.empty, insert, findWithMatchingOriginProjectingForward, findWithMatchingOriginProjectingBackward, findWithMatchingHopToOrigin, findWithMatchingOriginToHop) where
-import Data.List (group, sort, groupBy, subsequences, nubBy, sortBy)
+module Ortho (Ortho (..)) where
 import Data.Set as Set
-    ( Set,
-      fromList,
-      toList,
-      size,
-      Set,
-      empty,
-      fromList,
-      singleton,
-      toList,
-      union,
-      unions )
-import Data.Map as Map (Map, singleton, fromList, empty, lookup, keys, (!), elems, size)
-import WordEater ( Answer(..), wordToUniqueAnswer )
+import Data.Map as Map
+import WordEater (Answer(..), wordToUniqueAnswer )
 import Data.Function (on)
 import Config
 import qualified Data.Map as Map (Map, empty, findWithDefault, insertWith)
+import Data.List (delete)
 
-newtype Ortho = Ortho{origin :: Node} deriving (Eq, Ord, Show)
-data NodeName = Origin String | Hop String deriving (Show, Eq, Ord)
-newtype Orthos = Orthos (Map.Map NodeName (Set.Set Ortho)) deriving (Show)
+
+newtype Path = Path [String] deriving (Eq, Ord, Show)
 data Node = Node
-  {
-    name :: String,
-    neighbors :: Map.Map Int Node
+  { name :: String,
+    location :: Path
   } deriving (Eq, Ord, Show)
+newtype Ortho = Ortho {nodes :: Set.Set Node}
+newtype Orthos = Orthos (Set.Set Ortho)
+newtype DirectedOrthos = DirectedOrthos (Set.Set DirectedOrtho)
+data DirectedOrtho = DirectedOrtho {ortho :: Ortho, combineAxis :: String}
 
-eatWord :: Config -> String -> [Ortho]
-eatWord conf cur = fromAnswer <$> wordToUniqueAnswer conf cur
+eatWord :: Config -> String -> Orthos
+eatWord = undefined
 
 fromAnswer :: Answer -> Ortho
-fromAnswer (Answer a b c d) = let
-  nodeA = Node a (Map.fromList [(0, nodeB), (1, nodeC)])
-  nodeB = Node b (Map.fromList [(1, nodeD)])
-  nodeC = Node c (Map.fromList [(0, nodeD)])
-  nodeD = Node d Map.empty
-  in Ortho nodeA
-
-getOrigin :: Ortho -> String
-getOrigin = name . origin
-
-hop :: Ortho -> Set.Set String
-hop (Ortho (Node _ neighbors)) = Set.fromList $ map name $ Map.elems neighbors
+fromAnswer = undefined
 
 empty :: Orthos
-empty = Orthos Map.empty
+empty = undefined
 
 insert :: Orthos -> Ortho -> Orthos
-insert (Orthos orthoMap) ortho =
-  let origin = Origin $ getOrigin ortho
-      originKey = (origin, ortho)
-      hopKeys = Hop <$> Set.toList (hop ortho)
-      missingKeys = originKey : zip hopKeys (repeat ortho)
-      updatedMap = foldr (\(nn, o) -> Map.insertWith Set.union nn (Set.singleton o)) orthoMap missingKeys
-   in Orthos updatedMap
+insert = undefined
 
 size :: Orthos -> Int
-size (Orthos m)= Map.size m
+size = undefined
 
-findWithMatchingOriginProjectingForward :: Config -> Orthos -> Ortho -> Set.Set Ortho
-findWithMatchingOriginProjectingForward config = lookupHelper (next config)
+projectsForward :: Config -> Orthos -> Ortho -> Orthos
+projectsForward = undefined
 
-findWithMatchingOriginProjectingBackward :: Config -> Orthos -> Ortho -> Set.Set Ortho
-findWithMatchingOriginProjectingBackward config = lookupHelper (prev config)
+projectsBackward :: Config -> Orthos -> Ortho -> Orthos
+projectsBackward = undefined
 
-lookupHelper :: Map.Map String (Set.Set String)  -> Orthos -> Ortho -> Set.Set Ortho
-lookupHelper mapping (Orthos orthoMap) ortho = let
-    projectedOrigin = Map.findWithDefault Set.empty (getOrigin ortho) mapping
-    originKeys = Origin <$> Set.toList projectedOrigin
-    results = (\key -> Map.findWithDefault Set.empty key orthoMap) <$> originKeys
-   in Set.unions results
+diagonalsLeft :: Orthos -> Ortho -> Orthos
+diagonalsLeft = undefined
 
-findWithMatchingHopToOrigin :: Orthos -> Ortho -> Set.Set Ortho
-findWithMatchingHopToOrigin (Orthos orthoMap) ortho =
-  let hops = Set.toList (hop ortho)
-      hopKeys = Origin <$> hops
-      results = (\key -> Map.findWithDefault Set.empty key orthoMap) <$> hopKeys
-   in Set.unions results
+diagonalsRight :: Orthos -> Ortho -> Orthos
+diagonalsRight = undefined
 
-findWithMatchingOriginToHop :: Orthos -> Ortho -> Set.Set Ortho
-findWithMatchingOriginToHop (Orthos orthoMap) ortho =
-  let orthoOrigin = getOrigin ortho
-      hopKeys = Hop orthoOrigin
-   in Map.findWithDefault Set.empty hopKeys orthoMap
+combineUpLeft :: Ortho -> Ortho -> Ortho
+combineUpLeft = undefined
 
-checkDiagonals :: Ortho -> Ortho -> Bool
-checkDiagonals l r = undefined
+combineUpRight :: Ortho -> Ortho -> Ortho
+combineUpRight = undefined
 
-checkEachPositionProjectsForward :: Config -> Ortho -> Ortho -> Bool
-checkEachPositionProjectsForward config l r = undefined
+centersMatchLeft :: Orthos -> Ortho -> DirectedOrthos
+centersMatchLeft = undefined
 
-checkEachPositionProjectsBackward :: Config -> Ortho -> Ortho -> Bool
-checkEachPositionProjectsBackward config l r = undefined
+centersMatchRight :: Orthos -> Ortho -> DirectedOrthos
+centersMatchRight = undefined
 
-checkCentersMatch :: Ortho -> Ortho -> Bool
-checkCentersMatch l r = undefined
+phrasesMatchLeft :: DirectedOrthos -> Ortho -> DirectedOrthos
+phrasesMatchLeft = undefined
 
-checkPhrases :: Config -> Ortho -> Ortho -> Bool
-checkPhrases config l r = undefined
+phrasesMatchRight :: DirectedOrthos -> Ortho -> DirectedOrthos
+phrasesMatchRight = undefined
+
+combineOverLeft :: DirectedOrthos -> Ortho -> Orthos
+combineOverLeft = undefined
+
+combineOverRight :: DirectedOrthos -> Ortho -> Orthos
+combineOverRight = undefined

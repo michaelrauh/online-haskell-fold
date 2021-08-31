@@ -4,7 +4,7 @@ import Config (makeConfig)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import Test.Hspec (Spec, describe, it, shouldBe)
-import Ortho (eatWord, empty, findWithMatchingHopToOrigin, findWithMatchingOriginProjectingBackward, findWithMatchingOriginProjectingForward, findWithMatchingOriginToHop, insert, size)
+import Ortho
 
 {-# ANN module "HLint: ignore Redundant do" #-}
 {-# ANN module "HLint: ignore Reduce duplication" #-}
@@ -12,50 +12,7 @@ import Ortho (eatWord, empty, findWithMatchingHopToOrigin, findWithMatchingOrigi
 spec :: Spec
 spec = do
   describe "Ortho" $ do
-    it "creating orthos and inserting them in multiple indices equivalent to dimensionality + 1" $ do
-      let result = size $ insert empty (head $ eatWord (makeConfig "a b c d a c b d") "d")
-          expected = 3
+    it "does very little so far" $ do
+      let result = 1
+          expected = 2
       result `shouldBe` expected
-    it "searching for orthos by dims and origin over a projection when looking for RHS" $ do
-      let config = makeConfig "a b c d a c b d a e f g h e g f h"
-          original = head $ eatWord config "d"
-          new = head $ eatWord config "h"
-          store = insert empty new
-          result = findWithMatchingOriginProjectingForward config store original
-          expected = Set.singleton new
-      result `shouldBe` expected
-    it "searching for orthos by dims and origin over a projection when looking for LHS" $ do
-      let config = makeConfig "a b c d a c b d a e f g h e g f h"
-          new = head $ eatWord config "d"
-          original = head $ eatWord config "h"
-          store = insert empty new
-          result = findWithMatchingOriginProjectingBackward config store original
-          expected = Set.singleton new
-      result `shouldBe` expected
-    it "searching for orthos by dims by matching a hop to an origin RHS" $ do
-      let config = makeConfig "a b c d a c b d b e d f b d e f"
-          new = head $ eatWord config "f"
-          original = head $ eatWord config "d"
-          store = insert empty new
-          result = findWithMatchingHopToOrigin store original
-          expected = Set.singleton new
-      result `shouldBe` expected
-    it "searching for orthos by dims by matching an origin to a hop LHS" $ do
-      let config = makeConfig "a b c d a c b d b e d f b d e f"
-          original = head $ eatWord config "f"
-          new = head $ eatWord config "d"
-          store = insert empty new
-          result = findWithMatchingOriginToHop store original
-          expected = Set.singleton new
-      result `shouldBe` expected
-    it "checks to make sure diagonals don't match up for all rotations. Has a left to right bias" $ do
-      let config = makeConfig "a b c d a c b d b e d f b d e f"
-          original = head $ eatWord config "f"
-          new = head $ eatWord config "d"
-          store = insert empty new
-          result = findWithMatchingOriginToHop store original
-          expected = Set.singleton new
-      result `shouldBe` expected
-
--- a b  
--- c d  
