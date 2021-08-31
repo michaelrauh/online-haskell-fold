@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Ortho (Ortho (..)) where
 import Data.Set as Set
 import Data.Map as Map
@@ -6,19 +8,25 @@ import Data.Function (on)
 import Config
 import qualified Data.Map as Map (Map, empty, findWithDefault, insertWith)
 import Data.List (delete)
+import Data.Text
 
-
-newtype Path = Path [String] deriving (Eq, Ord, Show)
+newtype Path = Path [Text] deriving (Eq, Ord, Show)
 data Node = Node
-  { name :: String,
+  { name :: Text,
     location :: Path
   } deriving (Eq, Ord, Show)
 newtype Ortho = Ortho {nodes :: Set.Set Node}
 newtype Orthos = Orthos (Set.Set Ortho)
 newtype DirectedOrthos = DirectedOrthos (Set.Set DirectedOrtho)
-data DirectedOrtho = DirectedOrtho {ortho :: Ortho, combineAxis :: String}
+data DirectedOrtho = DirectedOrtho {ortho :: Ortho, combineAxis :: Text}
 
-eatWord :: Config -> String -> Orthos
+x :: String 
+x = "bar"
+
+foo :: Text 
+foo = pack x
+
+eatWord :: Config -> Text -> Orthos
 eatWord = undefined
 
 fromAnswer :: Answer -> Ortho
