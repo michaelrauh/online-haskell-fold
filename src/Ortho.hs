@@ -20,13 +20,11 @@ data DirectedOrtho = DirectedOrtho {ortho :: ShiftedOrtho, combineAxis :: Text}
 newtype ShiftedOrtho = ShiftedOrtho Ortho
 
 digestWords :: Config -> Orthos
-digestWords config = Prelude.foldr (digestIt config) emptyOrtho $ vocab config
+digestWords config = Prelude.foldr (digestIt config) emptyOrtho $ pack <$> vocab config
 
-digestIt :: Config -> String -> Orthos -> Orthos
-digestIt config word orthos = digestWord config orthos $ pack word
 
-digestWord :: Config -> Orthos -> Text -> Orthos
-digestWord config orthos word = sift config orthos $ eatWord config word
+digestIt :: Config -> Text -> Orthos -> Orthos
+digestIt config word orthos = sift config orthos $ eatWord config word
 
 sift :: Config -> Orthos -> Orthos -> Orthos
 sift config known increment = if emptyOrthos increment then known else let 
