@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Ortho (Ortho (..)) where
 import Data.Set as Set
 import Data.Map as Map
@@ -18,13 +16,8 @@ data Node = Node
 newtype Ortho = Ortho {nodes :: Set.Set Node}
 newtype Orthos = Orthos (Set.Set Ortho)
 newtype DirectedOrthos = DirectedOrthos (Set.Set DirectedOrtho)
-data DirectedOrtho = DirectedOrtho {ortho :: Ortho, combineAxis :: Text}
-
-x :: String 
-x = "bar"
-
-foo :: Text 
-foo = pack x
+data DirectedOrtho = DirectedOrtho {ortho :: ShiftedOrtho, combineAxis :: Text}
+newtype ShiftedOrtho = ShiftedOrtho Ortho
 
 eatWord :: Config -> Text -> Orthos
 eatWord = undefined
