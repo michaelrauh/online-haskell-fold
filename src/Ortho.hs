@@ -51,6 +51,9 @@ emptyOrthos = undefined
 combineIfBase :: Config -> Orthos -> Ortho -> Orthos -- if it is not base return the empty orthos. If it is base return only previously unknown results
 combineIfBase = error "not implemented"
 
+eatWord :: Config -> Text -> Orthos
+eatWord = undefined
+
 fromAnswer :: Answer -> Ortho
 fromAnswer = undefined
 
