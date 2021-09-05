@@ -5,8 +5,9 @@ import WordEater (Answer(..), wordToUniqueAnswer )
 import Data.Function (on)
 import Config
 import qualified Data.Map as Map (Map, empty, findWithDefault, insertWith)
-import Data.List (delete, sort, maximumBy, nub)
+import Data.List (delete, sort, maximumBy, nub, groupBy, permutations)
 import Data.Text
+import Data.Maybe
 
 newtype Path = Path [Text] deriving (Eq, Ord, Show)
 data Node = Node
@@ -18,6 +19,7 @@ newtype Orthos = Orthos (Set.Set Ortho)
 newtype DirectedOrthos = DirectedOrthos (Set.Set DirectedOrtho)
 data DirectedOrtho = DirectedOrtho {ortho :: ShiftedOrtho, combineAxis :: Text}
 newtype ShiftedOrtho = ShiftedOrtho Ortho
+data Correspondence = Correspondence {orthoCorr :: Ortho, corr :: [(String, String)]}
 
 digestWords :: Config -> Orthos
 digestWords config = Prelude.foldr (digestWord config) emptyOrtho $ vocab config
@@ -39,12 +41,12 @@ sift config known increment = if isEmpty increment then known else let
 mergeOrthos :: Orthos -> Orthos -> Orthos
 mergeOrthos (Orthos o1) (Orthos o2) = Orthos $ Set.union o1 o2
 
-fromList :: [Ortho] -> Orthos
+fromList :: [Ortho] -> Orthos -- export this and not the data constructor
 fromList orthos = Orthos $ Set.fromList orthos
 
 pickOne :: Orthos -> (Ortho, Orthos)
 pickOne (Orthos o) = let
-  (f, s) = Set.deleteFindMin o
+  (f, s) = Set.deleteFindMin o -- at this time min is arbitrary but if ord were defined by distance, then min would iterate in order of distance
   in (f, Orthos s)
 
 isEmpty :: Orthos -> Bool
@@ -54,13 +56,13 @@ eatWord :: Config -> String -> Orthos
 eatWord conf cur = Orthos $ Set.fromList $ fromAnswer <$> wordToUniqueAnswer conf cur
 
 fromAnswer :: Answer -> Ortho
-fromAnswer (Answer a b c d) = Ortho $ Set.fromList 
-  [Node a' $ Path [], 
+fromAnswer (Answer a b c d) = Ortho $ Set.fromList
+  [Node a' $ Path [],
    Node b' $ Path [b'],
-   Node c' $ Path [c'], 
-   Node d' $ Path $ sort [b', c']] where 
+   Node c' $ Path [c'],
+   Node d' $ Path $ sort [b', c']] where
   a' = pack a
-  b' = pack b 
+  b' = pack b
   c' = pack c
   d' = pack d
 
@@ -73,15 +75,15 @@ insert (Orthos s) o = Orthos $ Set.insert o s
 size :: Orthos -> Int
 size (Orthos o) = Set.size o
 
-combineUpIfBase :: Config -> Orthos -> Ortho -> Orthos 
-combineUpIfBase c os o = if isNotBase o then emptyOrtho else let 
+combineUpIfBase :: Config -> Orthos -> Ortho -> Orthos
+combineUpIfBase c os o = if isNotBase o then emptyOrtho else let
   l = combineUpLeft c os o
   r = combineUpRight c os o
   in mergeOrthos l r
 
 -- this would be much faster if ortho were indexed by distance
 isNotBase :: Ortho -> Bool
-isNotBase (Ortho s) = let 
+isNotBase (Ortho s) = let
   (Path underlying) = location $ maximumBy (compare `on` locationLength) $ Set.toList s
   in nub underlying /= underlying
 
@@ -90,8 +92,8 @@ locationLength (Node _ (Path l)) = Prelude.length l
 
 -- Reader would allow skipping this config pass
 combineUpRight :: Config -> Orthos -> Ortho -> Orthos
-combineUpRight c os o = let 
-  projects = projectsBackward c os o 
+combineUpRight c os o = let
+  projects = projectsBackward c os o
   found = diagonalsLeft projects o
   in filterOld os found
 
@@ -99,13 +101,40 @@ filterOld :: Orthos -> Orthos -> Orthos
 filterOld (Orthos old) (Orthos new) = Orthos $ new `Set.difference` old
 
 combineUpLeft :: Config -> Orthos -> Ortho -> Orthos
-combineUpLeft c os o = let 
-  projects = projectsForward c os o 
+combineUpLeft c os o = let
+  projects = projectsForward c os o
   found = diagonalsRight projects o
   in filterOld os found
 
 projectsForward :: Config -> Orthos -> Ortho -> Orthos
-projectsForward = undefined
+projectsForward c os o = let
+  ns = nodes o
+  origin = Set.findMin $ Set.filter ((0 ==) . locationLength) ns -- this would be faster if indexed by distance. Alternatively if ord were distance findMin would work. This would also expose toAscList
+  forward = Map.findWithDefault Set.empty (unpack (name origin)) (next c) -- this unpack would be unneccesary if everything was text
+  matchingOrigin = findWithOrigin os forward
+  axisCorrespondence = Prelude.concat $ findAxisCorrespondence c o <$> Ortho.toList matchingOrigin
+  in Orthos $ Set.fromList (orthoCorr <$> Prelude.filter (checkAllProjectionsExceptOriginAndHop o) axisCorrespondence)
+
+checkAllProjectionsExceptOriginAndHop :: Ortho -> Correspondence -> Bool -- this would be slower if indexed by anything
+checkAllProjectionsExceptOriginAndHop = error "not implemented"
+
+findAxisCorrespondence :: Config -> Ortho -> Ortho -> [Correspondence] -- there are less redundant ways to do this. Hopefully memoization saves us
+findAxisCorrespondence c from to = let
+  corrPerms = uncurry Prelude.zip <$> ((,) <$> permutations (getHop from) <*> permutations (getHop to))
+  finds = Prelude.filter (checkEachPairProjects c) corrPerms
+  in Correspondence to <$> finds
+
+checkEachPairProjects :: Config -> [(String, String)] -> Bool -- this would be faster if text
+checkEachPairProjects = undefined
+
+getHop :: Ortho -> [String] -- this would be faster if ord were distance, or if things were bucketed by distance
+getHop = undefined
+
+toList :: Orthos -> [Ortho]
+toList (Orthos s) = Set.toList s
+
+findWithOrigin :: Orthos -> Set String -> Orthos -- this would be faster if orthos were indexed by origin
+findWithOrigin = undefined
 
 projectsBackward :: Config -> Orthos -> Ortho -> Orthos
 projectsBackward = undefined
