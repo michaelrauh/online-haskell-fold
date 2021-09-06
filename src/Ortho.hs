@@ -9,7 +9,7 @@ import Data.List (delete, sort, maximumBy, nub, groupBy, permutations)
 import Data.Text
 import Data.Maybe
 
-newtype Path = Path [Text] deriving (Eq, Ord, Show)
+newtype Path = Path {path :: [Text]} deriving (Eq, Ord, Show)
 data Node = Node
   { name :: Text,
     location :: Path
@@ -19,7 +19,7 @@ newtype Orthos = Orthos (Set.Set Ortho)
 newtype DirectedOrthos = DirectedOrthos (Set.Set DirectedOrtho)
 data DirectedOrtho = DirectedOrtho {ortho :: ShiftedOrtho, combineAxis :: Text}
 newtype ShiftedOrtho = ShiftedOrtho Ortho
-data Correspondence = Correspondence {orthoCorr :: Ortho, corr :: [(String, String)]}
+data Correspondence = Correspondence {fromOrtho :: Ortho, toOrtho :: Ortho, corr :: [(String, String)]}
 
 digestWords :: Config -> Orthos
 digestWords config = Prelude.foldr (digestWord config) emptyOrtho $ vocab config
@@ -113,21 +113,38 @@ projectsForward c os o = let
   forward = Map.findWithDefault Set.empty (unpack (name origin)) (next c) -- this unpack would be unneccesary if everything was text
   matchingOrigin = findWithOrigin os forward
   axisCorrespondence = Prelude.concat $ findAxisCorrespondence c o <$> Ortho.toList matchingOrigin
-  in Orthos $ Set.fromList (orthoCorr <$> Prelude.filter (checkAllProjectionsExceptOriginAndHop o) axisCorrespondence)
+  in Orthos $ Set.fromList (toOrtho <$> Prelude.filter (checkAllProjectionsExceptOriginAndHop c) axisCorrespondence)
 
-checkAllProjectionsExceptOriginAndHop :: Ortho -> Correspondence -> Bool -- this would be slower if indexed by anything
-checkAllProjectionsExceptOriginAndHop = error "not implemented"
+checkAllProjectionsExceptOriginAndHop :: Config -> Correspondence -> Bool -- reader would jump config over this
+checkAllProjectionsExceptOriginAndHop c (Correspondence from to corr) = let
+  corrMap = Map.fromList corr
+  nodesToCheckFilter = Set.filter ((<) 2 . locationLength) . nodes -- this would be simpler with distance bucketing. Potentially slower though.
+  nodesToCheckFrom = nodesToCheckFilter from
+  nodesToCheckTo = nodesToCheckFilter to
+  checksPassed = checkNodeProjectsForwardAcrossMappedPath c corrMap nodesToCheckTo nodesToCheckFrom
+  in checksPassed
 
-findAxisCorrespondence :: Config -> Ortho -> Ortho -> [Correspondence] -- there are less redundant ways to do this. Hopefully memoization saves us
+checkNodeProjectsForwardAcrossMappedPath :: Config -> Map String String -> Set Node -> Set Node -> Bool -- reader would jump config over this
+checkNodeProjectsForwardAcrossMappedPath c corrMap from to = let
+  correspondingNodeNames = findCorresponding corrMap to <$> Set.toList from
+  in checkEachPairProjects c correspondingNodeNames
+
+findCorresponding :: Map String String -> Set Node -> Node -> (String, String) 
+findCorresponding corrMap toSet (Node fromName (Path fromLocation)) = let
+  toPath = Path (pack . (corrMap !) . unpack <$> fromLocation)
+  toNode = Set.findMin $ Set.filter ((toPath ==) . location) toSet -- this would be faster if there could be a mapping from path to name
+  in (unpack fromName, (unpack . name) toNode)
+
+findAxisCorrespondence :: Config -> Ortho -> Ortho -> [Correspondence] -- there are less redundant ways to do this. If one axis fails it's a complete failure.
 findAxisCorrespondence c from to = let
-  corrPerms = uncurry Prelude.zip <$> ((,) <$> permutations (getHop from) <*> permutations (getHop to))
+  corrPerms = uncurry Prelude.zip <$> ((,) <$> permutations (Set.toList $ getHop from) <*> permutations (Set.toList $ getHop to))
   finds = Prelude.filter (checkEachPairProjects c) corrPerms
-  in Correspondence to <$> finds
+  in Correspondence from to <$> finds
 
 checkEachPairProjects :: Config -> [(String, String)] -> Bool -- this would be faster if text
-checkEachPairProjects = undefined
+checkEachPairProjects  = undefined
 
-getHop :: Ortho -> [String] -- this would be faster if ord were distance, or if things were bucketed by distance
+getHop :: Ortho -> Set.Set String -- this would be faster if ord were distance, or if things were bucketed by distance
 getHop = undefined
 
 toList :: Orthos -> [Ortho]
