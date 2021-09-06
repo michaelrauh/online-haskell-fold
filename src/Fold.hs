@@ -1,12 +1,32 @@
 module Fold where
 import Orthos
-import Config 
+    ( emptyOrtho,
+      filterOld,
+      findWithOrigin,
+      isEmpty,
+      mergeOrthos,
+      pickOne,
+      selectSameDimensionalityForBaseOrtho,
+      toList,
+      Correspondence(Correspondence, toOrtho),
+      DirectedOrthos,
+      Orthos(..) )
+import Config ( Config(vocab, next) ) 
 import Ortho
-import Data.Set as Set
-import Data.Map as Map
-import WordEater
-import Data.List
-import Data.Text
+    ( findCorresponding,
+      fromAnswer,
+      getHop,
+      getName,
+      getNodesOfDistanceGreaterThan,
+      getOrigin,
+      isNotBase,
+      Node,
+      Ortho )
+import Data.Set as Set ( Set, empty, fromList, toList )
+import Data.Map as Map ( Map, findWithDefault, fromList )
+import WordEater ( wordToUniqueAnswer )
+import Data.List ( permutations )
+import Data.Text ( unpack )
 
 digestWords :: Config -> Orthos
 digestWords config = Prelude.foldr (digestWord config) emptyOrtho $ vocab config

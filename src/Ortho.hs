@@ -10,6 +10,7 @@ import Data.Text ( pack, unpack, Text )
 -- TODO make node ord be distance
 -- TODO wrap ortho in square or rectangle. up returns input if rectangle and always returns a square. Over returns rectangle.
 -- TODO export selectively from here
+-- TODO use Text
 
 newtype Path = Path {path :: [Text]} deriving (Eq, Ord, Show)
 data Node = Node
