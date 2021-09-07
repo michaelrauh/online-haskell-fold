@@ -5,7 +5,7 @@ import Ortho
       fromAnswer,
       isNotBase,
       getOrigin,
-      getName, getNodesOfDistanceGreaterThan, getHop, DirectedOrtho )
+      getName, getNonOriginAndHopNodes, getHop, DirectedOrtho )
 import Data.Set as Set
     ( deleteFindMin,
       difference,
@@ -25,8 +25,6 @@ import Data.List ( permutations )
 newtype Orthos = Orthos (Set.Set Ortho)
 data Correspondence = Correspondence {fromOrtho :: Ortho, toOrtho :: Ortho, corr :: [(String, String)]}
 newtype DirectedOrthos = DirectedOrthos (Set.Set DirectedOrtho)
-
--- TODO index orthos by origin
 
 mergeOrthos :: Orthos -> Orthos -> Orthos
 mergeOrthos (Orthos o1) (Orthos o2) = Orthos $ Set.union o1 o2
@@ -51,7 +49,7 @@ insert (Orthos s) o = Orthos $ Set.insert o s
 size :: Orthos -> Int
 size (Orthos o) = Set.size o
 
-selectSameDimensionalityForBaseOrtho :: Orthos -> Ortho -> Orthos -- this assumes ortho is base dims and only selects based upon number of dims
+selectSameDimensionalityForBaseOrtho :: Orthos -> Ortho -> Orthos
 selectSameDimensionalityForBaseOrtho = error "not implemented"
 
 filterOld :: Orthos -> Orthos -> Orthos

@@ -17,7 +17,7 @@ import Ortho
       fromAnswer,
       getHop,
       getName,
-      getNodesOfDistanceGreaterThan,
+      getNonOriginAndHopNodes,
       getOrigin,
       isNotBase,
       Node,
@@ -62,8 +62,8 @@ checkEachPairProjects  = undefined
 checkAllProjectionsExceptOriginAndHop :: Config -> Correspondence -> Bool -- reader would jump config over this
 checkAllProjectionsExceptOriginAndHop c (Correspondence from to corr) =
   let corrMap = Map.fromList corr
-      nodesToCheckFrom = getNodesOfDistanceGreaterThan 1 from
-      nodesToCheckTo = getNodesOfDistanceGreaterThan 1 to
+      nodesToCheckFrom = getNonOriginAndHopNodes from
+      nodesToCheckTo = getNonOriginAndHopNodes to
       checksPassed = checkNodeProjectsForwardAcrossMappedPath c corrMap nodesToCheckTo nodesToCheckFrom
    in checksPassed
 

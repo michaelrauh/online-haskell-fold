@@ -1,5 +1,5 @@
 module Ortho where
-import Data.Set as Set ( filter, findMin, fromList, toList, Set )
+import Data.Set as Set ( filter, findMin, fromList, toList, Set, lookupMax, findMax, dropWhileAntitone, takeWhileAntitone, empty, deleteMin )
 import Data.Map as Map ( (!), fromList, Map )
 import WordEater (Answer(..) )
 import Data.Function (on)
@@ -7,19 +7,19 @@ import qualified Data.Map as Map (Map, empty, findWithDefault, insertWith)
 import Data.List (delete, sort, maximumBy, nub, groupBy, permutations)
 import Data.Text ( pack, unpack, Text )
 
--- TODO make node ord be distance
--- TODO wrap ortho in square or rectangle. up returns input if rectangle and always returns a square. Over returns rectangle.
--- TODO export selectively from here
--- TODO use Text
-
 newtype Path = Path {path :: [Text]} deriving (Eq, Ord, Show)
 data Node = Node
   { name :: Text,
     location :: Path
-  } deriving (Eq, Ord, Show)
+  } deriving (Eq, Show)
 newtype Ortho = Ortho {nodes :: Set.Set Node} deriving (Eq, Ord)
 data DirectedOrtho = DirectedOrtho {ortho :: ShiftedOrtho, combineAxis :: Text}
 newtype ShiftedOrtho = ShiftedOrtho Ortho
+
+instance Ord Node where
+  compare a b = let
+    comparator = length . path . location
+    in (compare `on` comparator) a b
 
 fromAnswer :: Answer -> Ortho
 fromAnswer (Answer a b c d) = Ortho $ Set.fromList
@@ -32,10 +32,9 @@ fromAnswer (Answer a b c d) = Ortho $ Set.fromList
   c' = pack c
   d' = pack d
 
--- this would be much faster if ortho were indexed by distance. lookupMax would do it. alternatively inspect a mapping from axis name to length
 isNotBase :: Ortho -> Bool
 isNotBase (Ortho s) = let
-  (Path underlying) = location $ maximumBy (compare `on` locationLength) $ Set.toList s
+  underlying = (path . location . Set.findMax) s
   in nub underlying /= underlying
 
 locationLength :: Node -> Int
@@ -45,22 +44,29 @@ getName :: Node -> Text
 getName = name
 
 getOrigin :: Ortho -> Node
-getOrigin o = Set.findMin $ Set.filter ((0 ==) . locationLength) (nodes o) -- this would be faster if indexed by distance. Alternatively if ord were distance findMin would work
+getOrigin = Set.findMin . nodes
 
-getNodesOfDistanceGreaterThan :: Int -> Ortho -> Set.Set Node
-getNodesOfDistanceGreaterThan dist (Ortho nodes) = Set.filter ((> 1) . locationLength) nodes -- this would be simpler and faster with distance bucketing
+getNonOriginAndHopNodes :: Ortho -> Set.Set Node
+getNonOriginAndHopNodes (Ortho nodes) = Set.dropWhileAntitone ((< 1) . locationLength) nodes
 
-findCorresponding :: Map String String -> Set Node -> Node -> (String, String) 
+findCorresponding :: Map String String -> Set Node -> Node -> (String, String)
 findCorresponding corrMap toSet fromNode = let
   toPath = Path (pack . (corrMap !) . unpack <$> getLocation fromNode)
   toNode = findNodeWithPath toPath toSet
   in (unpack (getName fromNode), (unpack . name) toNode)
 
 getLocation :: Node -> [Text]
-getLocation = error "not implemented"
+getLocation = path . location
 
-findNodeWithPath :: Path -> Set Node -> Node -- this would be faster if indexed by distance. Filter by size first then check path.
-findNodeWithPath toPath toSet = Set.findMin $ Set.filter ((toPath ==) . location) toSet
+findNodeWithPath :: Path -> Set Node -> Node
+findNodeWithPath toPath toSet = let 
+  distance = (length . path) toPath
+  eliminatedFirst = Set.dropWhileAntitone ((< distance) . length . path . location) toSet
+  eliminatedSecond = Set.takeWhileAntitone ((== distance) . length . path . location) eliminatedFirst
+  in Set.findMin $ Set.filter ((toPath ==) . location) eliminatedSecond
 
-getHop :: Ortho -> Set.Set String -- this would be faster if ord were distance, or if things were bucketed by distance
-getHop = undefined
+getHop :: Ortho -> Set.Set String
+getHop (Ortho s) = let 
+  allButOrigin = Set.deleteMin s
+  hopSet = Set.takeWhileAntitone ((== 1) . length . path . location) allButOrigin
+  in Set.fromList $ unpack . getName <$> Set.toList hopSet
