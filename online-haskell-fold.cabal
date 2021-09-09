@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c06804a6fae8832cb8941358263c8c0a41fb97531bf2f4665b76e14d1a56e4b5
+-- hash: f533debffdcfb52bc00335c696072f82696b334c0ef38a90656cb958c46384c6
 
 name:           online-haskell-fold
 version:        0.1.0.0
@@ -40,6 +40,7 @@ library
   build-depends:
       base >=4.7 && <5
     , containers
+    , hashable
     , hspec
     , split
     , text
@@ -55,6 +56,7 @@ executable online-haskell-fold-exe
   build-depends:
       base >=4.7 && <5
     , containers
+    , hashable
     , hspec
     , online-haskell-fold
     , split
@@ -75,6 +77,7 @@ test-suite online-haskell-fold-test
   build-depends:
       base >=4.7 && <5
     , containers
+    , hashable
     , hspec
     , online-haskell-fold
     , split

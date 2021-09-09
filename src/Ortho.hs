@@ -1,3 +1,5 @@
+{-# LANGUAGE DeriveGeneric #-}
+
 module Ortho where
 import Data.Set as Set ( filter, findMin, fromList, toList, Set, lookupMax, findMax, dropWhileAntitone, takeWhileAntitone, empty, deleteMin )
 import Data.Map as Map ( (!), fromList, Map )
@@ -6,20 +8,32 @@ import Data.Function (on)
 import qualified Data.Map as Map (Map, empty, findWithDefault, insertWith)
 import Data.List (delete, sort, maximumBy, nub, groupBy, permutations)
 import Data.Text ( pack, unpack, Text )
+import Data.Hashable ( Hashable(hashWithSalt) )
+import GHC.Generics (Generic)
 
-newtype Path = Path {path :: [Text]} deriving (Eq, Ord, Show)
+newtype Path = Path {path :: [Text]} deriving (Eq, Ord, Show, Generic)
 data Node = Node
   { name :: Text,
     location :: Path
-  } deriving (Eq, Show)
-newtype Ortho = Ortho {nodes :: Set.Set Node} deriving (Eq, Ord)
+  } deriving (Eq, Show, Generic)
+newtype Ortho = Ortho {nodes :: Set.Set Node} deriving (Eq, Ord, Generic)
 data DirectedOrtho = DirectedOrtho {ortho :: ShiftedOrtho, combineAxis :: Text}
 newtype ShiftedOrtho = ShiftedOrtho Ortho
+newtype Dims = Dims [Int]
+
+instance Hashable Path
+instance Hashable Node
+
+instance Hashable Ortho where
+  hashWithSalt s (Ortho nodes) = s `hashWithSalt` (sort . Set.toList) nodes
 
 instance Ord Node where
   compare a b = let
     comparator = length . path . location
     in (compare `on` comparator) a b
+
+getDims :: Ortho -> [Int]
+getDims = undefined
 
 fromAnswer :: Answer -> Ortho
 fromAnswer (Answer a b c d) = Ortho $ Set.fromList
