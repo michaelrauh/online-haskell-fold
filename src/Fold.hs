@@ -1,32 +1,12 @@
 module Fold where
 import Orthos
-    ( emptyOrtho,
-      filterOld,
-      findWithOrigin,
-      isEmpty,
-      mergeOrthos,
-      pickOne,
-      selectSameDimensionalityForBaseOrtho,
-      toList,
-      Correspondence(Correspondence, toOrtho),
-      DirectedOrthos,
-      Orthos(..) )
 import Config ( Config(vocab, next) ) 
 import Ortho
-    ( findCorresponding,
-      fromAnswer,
-      getHop,
-      getName,
-      getNonOriginAndHopNodes,
-      getOrigin,
-      isNotBase,
-      Node,
-      Ortho )
 import Data.Set as Set ( Set, empty, fromList, toList )
 import Data.Map as Map ( Map, findWithDefault, fromList )
 import WordEater ( wordToUniqueAnswer )
 import Data.List ( permutations )
-import Data.Text ( unpack )
+import Data.Text ( unpack, Text, pack )
 
 digestWords :: Config -> Orthos
 digestWords config = Prelude.foldr (digestWord config) emptyOrtho $ vocab config
@@ -49,17 +29,17 @@ sift config known increment =
        in sift config over rest
 
 eatWord :: Config -> String -> Orthos
-eatWord conf cur = Orthos $ Set.fromList $ fromAnswer <$> wordToUniqueAnswer conf cur
+eatWord conf cur = Orthos.fromList $ fromAnswer <$> wordToUniqueAnswer conf cur
 
-checkNodeProjectsForwardAcrossMappedPath :: Config -> Map String String -> Set Node -> Set Node -> Bool -- reader would jump config over this 
+checkNodeProjectsForwardAcrossMappedPath :: Config -> Map String String -> Set Node -> Set Node -> Bool
 checkNodeProjectsForwardAcrossMappedPath c corrMap from to =
   let correspondingNodeNames = findCorresponding corrMap to <$> Set.toList from
    in checkEachPairProjects c correspondingNodeNames
 
-checkEachPairProjects :: Config -> [(String, String)] -> Bool -- this would be faster if text
+checkEachPairProjects :: Config -> [(String, String)] -> Bool
 checkEachPairProjects  = undefined
 
-checkAllProjectionsExceptOriginAndHop :: Config -> Correspondence -> Bool -- reader would jump config over this
+checkAllProjectionsExceptOriginAndHop :: Config -> Correspondence -> Bool
 checkAllProjectionsExceptOriginAndHop c (Correspondence from to corr) =
   let corrMap = Map.fromList corr
       nodesToCheckFrom = getNonOriginAndHopNodes from
@@ -67,7 +47,7 @@ checkAllProjectionsExceptOriginAndHop c (Correspondence from to corr) =
       checksPassed = checkNodeProjectsForwardAcrossMappedPath c corrMap nodesToCheckTo nodesToCheckFrom
    in checksPassed
 
-findAxisCorrespondence :: Config -> Ortho -> Ortho -> [Correspondence] -- there are less redundant ways to do this. If one axis fails it's a complete failure.
+findAxisCorrespondence :: Config -> Ortho -> Ortho -> [Correspondence]
 findAxisCorrespondence c from to =
   let corrPerms = uncurry Prelude.zip <$> ((,) <$> permutations (Set.toList $ getHop from) <*> permutations (Set.toList $ getHop to))
       finds = Prelude.filter (checkEachPairProjects c) corrPerms
@@ -78,12 +58,11 @@ combineUpIfBase c os o =
   if isNotBase o
     then emptyOrtho
     else
-      let newOs = selectSameDimensionalityForBaseOrtho os o
+      let newOs = selectByDims os $ getDims o
           l = combineUpLeft c newOs o
           r = combineUpRight c newOs o
        in mergeOrthos l r
 
--- Reader would allow skipping this config pass
 combineUpRight :: Config -> Orthos -> Ortho -> Orthos
 combineUpRight c os o =
   let projects = projectsBackward c os o
@@ -98,10 +77,11 @@ combineUpLeft c os o =
 
 projectsForward :: Config -> Orthos -> Ortho -> Orthos
 projectsForward c os o =
-  let forward = Map.findWithDefault Set.empty ((unpack . getName . getOrigin) o) (next c) -- this unpack would be unneccesary if everything was text
-      matchingOrigin = findWithOrigin os forward
-      axisCorrespondence = Prelude.concat $ findAxisCorrespondence c o <$> Orthos.toList matchingOrigin
-   in Orthos $ Set.fromList (toOrtho <$> Prelude.filter (checkAllProjectionsExceptOriginAndHop c) axisCorrespondence)
+  let forward = Map.findWithDefault Set.empty ((unpack . getName . getOrigin) o) (next c)
+      matchingOrigin = selectByOrigin os . pack <$> Set.toList forward
+      singleOrthoThing = foldr mergeOrthos emptyOrtho matchingOrigin
+      axisCorrespondence = Prelude.concat $ findAxisCorrespondence c o <$> Orthos.toList singleOrthoThing
+   in Orthos.fromList (toOrtho <$> Prelude.filter (checkAllProjectionsExceptOriginAndHop c) axisCorrespondence)
 
 projectsBackward :: Config -> Orthos -> Ortho -> Orthos
 projectsBackward = undefined
