@@ -19,7 +19,7 @@ data Node = Node
 newtype Ortho = Ortho {nodes :: Set.Set Node} deriving (Eq, Ord, Generic)
 data DirectedOrtho = DirectedOrtho {ortho :: ShiftedOrtho, combineAxis :: Text}
 newtype ShiftedOrtho = ShiftedOrtho Ortho
-newtype Dims = Dims [Int] -- change this to Data.Multiset
+newtype Dims = Dims [Int] -- change this to Data.Multiset to make it clear 
 
 instance Hashable Path -- remove hashing
 instance Hashable Node

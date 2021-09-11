@@ -65,5 +65,7 @@ selectByOrigin = undefined
 fromSet :: Set.Set Orthos -> Orthos 
 fromSet = undefined
 
--- two approaches : keep it all map of map, or have selectByDims return a map, and selectByHop return a set.
+-- two approaches : keep it all map of map, or have selectByDims return a map, and selectByHop and selectByOrigin return a set.
 -- Then the other functions can support maps of maps, maps, or sets for speed.
+-- alternatively, use sets for everything. If ord is by dims and then by origin or hop, antitone functions will give the desired output on selects.
+-- this could be two sets or one set for hop and origin. selectByOrigin implies no hops.
