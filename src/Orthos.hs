@@ -69,3 +69,8 @@ fromSet = undefined
 -- Then the other functions can support maps of maps, maps, or sets for speed.
 -- alternatively, use sets for everything. If ord is by dims and then by origin or hop, antitone functions will give the desired output on selects.
 -- this could be two sets or one set for hop and origin. selectByOrigin implies no hops.
+-- todo make a wrapper newtype for ortho that is origin or hop. Then make an ord instance for each that is (dims, text) where text is origin or hop
+-- issue - hop is one to many. either ord by latest hop, or do a straight linear filter for those.
+-- actual plan: ord by dims and origin. If selecting by dims or by origin, use antitone (make select by origin safe by dropping by dims first). 
+-- wrap hop orthos in a type that adds a focus. Generate one of these to focus on each hop value. Ord by dims and focus. Then you get a lumpy tree with lots of repeats.
+-- antitone will group them by dims and then by focus hop.
