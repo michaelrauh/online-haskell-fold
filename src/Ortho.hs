@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveGeneric #-}
-
 module Ortho where
 import Data.Set as Set ( filter, findMin, fromList, toList, Set, lookupMax, findMax, dropWhileAntitone, takeWhileAntitone, empty, deleteMin )
 import Data.Map as Map ( (!), fromList, Map )
@@ -9,31 +7,29 @@ import qualified Data.Map as Map (Map, empty, findWithDefault, insertWith)
 import Data.List (delete, sort, maximumBy, nub, groupBy, permutations)
 import Data.Text ( pack, unpack, Text )
 import Data.Hashable ( Hashable(hashWithSalt) )
-import GHC.Generics (Generic)
+import Data.MultiSet as MultiSet
 
-newtype Path = Path {path :: [Text]} deriving (Eq, Ord, Show, Generic) -- change path to data multiset to skip sort when creating and comparing paths.
+newtype Path = Path {path :: [MultiSet.MultiSet Text]} deriving (Eq, Ord, Show) -- change path to data multiset to skip sort when creating and comparing paths.
 data Node = Node
   { name :: Text,
     location :: Path
-  } deriving (Eq, Show, Generic)
-newtype Ortho = Ortho {nodes :: Set.Set Node} deriving (Eq, Ord, Generic)
+  } deriving (Eq, Show)
+newtype Ortho = Ortho {nodes :: Set.Set Node} deriving (Eq)
 data DirectedOrtho = DirectedOrtho {ortho :: ShiftedOrtho, combineAxis :: Text}
 newtype ShiftedOrtho = ShiftedOrtho Ortho
-newtype Dims = Dims [Int] -- change this to Data.Multiset to make it clear 
+newtype Dims = Dims [MultiSet.MultiSet Int] deriving (Eq, Ord) -- change this to Data.Multiset to make it clear and get good ord behavior
 
-instance Hashable Path -- remove hashing
-instance Hashable Node
-
-instance Hashable Ortho where
-  hashWithSalt s (Ortho nodes) = s `hashWithSalt` (sort . Set.toList) nodes
+instance Ord Ortho where
+  compare a b = let
+    dimsComp = (compare `on` getDims) a b
+    originComp = (compare `on` getOrigin) a b
+    in if dimsComp /= EQ then dimsComp else originComp
 
 instance Ord Node where
-  compare a b = let
-    comparator = length . path . location
-    in (compare `on` comparator) a b
+  compare = compare `on` length . path . location
 
-getDims :: Ortho -> Dims 
-getDims = undefined 
+getDims :: Ortho -> Dims
+getDims = undefined
 
 fromAnswer :: Answer -> Ortho
 fromAnswer (Answer a b c d) = Ortho $ Set.fromList
@@ -73,14 +69,14 @@ getLocation :: Node -> [Text]
 getLocation = path . location
 
 findNodeWithPath :: Path -> Set Node -> Node
-findNodeWithPath toPath toSet = let 
+findNodeWithPath toPath toSet = let
   distance = (length . path) toPath
   eliminatedFirst = Set.dropWhileAntitone ((< distance) . length . path . location) toSet
   eliminatedSecond = Set.takeWhileAntitone ((== distance) . length . path . location) eliminatedFirst
   in Set.findMin $ Set.filter ((toPath ==) . location) eliminatedSecond
 
 getHop :: Ortho -> Set.Set String
-getHop (Ortho s) = let 
+getHop (Ortho s) = let
   allButOrigin = Set.deleteMin s
   hopSet = Set.takeWhileAntitone ((== 1) . length . path . location) allButOrigin
   in Set.fromList $ unpack . getName <$> Set.toList hopSet

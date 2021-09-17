@@ -21,13 +21,23 @@ import Data.Map as Map ( findWithDefault, fromList, Map, (!) )
 import Data.Text ( unpack, Text )
 import WordEater (Answer (..), wordToUniqueAnswer)
 import Data.List ( permutations )
+import Data.Function ( on )
 
-type DimsMapping = Map.Map Dims (Map.Map Text Ortho)
 data Orthos = Orthos Origins Hops
-newtype Origins = Origins DimsMapping
-newtype Hops = Hops DimsMapping
+newtype Origins = Origins (Set.Set Ortho)
+newtype Hops = Hops (Set.Set FocusedHop)
 data Correspondence = Correspondence {fromOrtho :: Ortho, toOrtho :: Ortho, corr :: [(String, String)]}
 newtype DirectedOrthos = DirectedOrthos (Set.Set DirectedOrtho)
+data FocusedHop = FocusedHop Text Ortho deriving (Eq)
+
+instance Ord FocusedHop where 
+  compare (FocusedHop t1 o1) (FocusedHop t2 o2) = let
+    dimsComp = (compare `on` getDims) o1 o2
+    focusComp = compare t1 t2
+    in if dimsComp /= EQ then dimsComp else focusComp
+
+takeContiguousSubset :: (a -> Bool) -> Set.Set a -> Set.Set a
+takeContiguousSubset = undefined
 
 mergeOrthos :: Orthos -> Orthos -> Orthos
 mergeOrthos = undefined
