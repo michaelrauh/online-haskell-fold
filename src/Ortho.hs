@@ -5,11 +5,12 @@ import WordEater (Answer(..) )
 import Data.Function (on)
 import qualified Data.Map as Map (Map, empty, findWithDefault, insertWith)
 import Data.List (delete, sort, maximumBy, nub, groupBy, permutations)
-import Data.Text ( pack, unpack, Text )
+import Data.Text ( Text )
 import Data.Hashable ( Hashable(hashWithSalt) )
 import Data.MultiSet as MultiSet
+    ( distinctSize, empty, fromList, map, singleton, size, MultiSet )
 
-newtype Path = Path {path :: [MultiSet.MultiSet Text]} deriving (Eq, Ord, Show) -- change path to data multiset to skip sort when creating and comparing paths.
+newtype Path = Path {path :: MultiSet.MultiSet Text} deriving (Eq, Ord, Show)
 data Node = Node
   { name :: Text,
     location :: Path
@@ -17,66 +18,62 @@ data Node = Node
 newtype Ortho = Ortho {nodes :: Set.Set Node} deriving (Eq)
 data DirectedOrtho = DirectedOrtho {ortho :: ShiftedOrtho, combineAxis :: Text}
 newtype ShiftedOrtho = ShiftedOrtho Ortho
-newtype Dims = Dims [MultiSet.MultiSet Int] deriving (Eq, Ord) -- change this to Data.Multiset to make it clear and get good ord behavior
+newtype Dims = Dims (MultiSet.MultiSet Int) deriving (Eq, Ord)
 
 instance Ord Ortho where
-  compare a b = let
-    dimsComp = (compare `on` getDims) a b
-    originComp = (compare `on` getOrigin) a b
-    in if dimsComp /= EQ then dimsComp else originComp
+  compare a b = undefined -- let
+    -- dimsComp = (compare `on` getDims) a b
+    -- originComp = (compare `on` getOrigin) a b
+    -- in if dimsComp /= EQ then dimsComp else originComp
 
 instance Ord Node where
-  compare = compare `on` length . path . location
+  compare = undefined -- compare `on` length . path . location
 
 getDims :: Ortho -> Dims
 getDims = undefined
 
 fromAnswer :: Answer -> Ortho
-fromAnswer (Answer a b c d) = Ortho $ Set.fromList
-  [Node a' $ Path [],
-   Node b' $ Path [b'],
-   Node c' $ Path [c'],
-   Node d' $ Path $ sort [b', c']] where
-  a' = pack a
-  b' = pack b
-  c' = pack c
-  d' = pack d
+fromAnswer (Answer a b c d) = undefined -- Ortho $ Set.fromList
+  -- [Node a $ Path MultiSet.empty,
+  --  Node b $ Path $ MultiSet.singleton b,
+  --  Node c $ Path $ MultiSet.singleton c,
+  --  Node d $ Path $ MultiSet.fromList [b, c]]
 
 isNotBase :: Ortho -> Bool
-isNotBase (Ortho s) = let
-  underlying = (path . location . Set.findMax) s
-  in nub underlying /= underlying
+isNotBase (Ortho s) = undefined -- let
+  -- underlying = (path . location . Set.findMax) s
+  -- in MultiSet.distinctSize underlying /= MultiSet.size underlying
 
 locationLength :: Node -> Int
-locationLength (Node _ (Path l)) = Prelude.length l
+locationLength (Node _ (Path l)) = undefined --  Prelude.length l
 
 getName :: Node -> Text
 getName = name
 
 getOrigin :: Ortho -> Node
-getOrigin = Set.findMin . nodes
+getOrigin = undefined -- Set.findMin . nodes
 
 getNonOriginAndHopNodes :: Ortho -> Set.Set Node
-getNonOriginAndHopNodes (Ortho nodes) = Set.dropWhileAntitone ((< 1) . locationLength) nodes
+getNonOriginAndHopNodes (Ortho nodes) = undefined -- Set.dropWhileAntitone ((< 1) . locationLength) nodes
 
-findCorresponding :: Map String String -> Set Node -> Node -> (String, String)
-findCorresponding corrMap toSet fromNode = let
-  toPath = Path (pack . (corrMap !) . unpack <$> getLocation fromNode)
-  toNode = findNodeWithPath toPath toSet
-  in (unpack (getName fromNode), (unpack . name) toNode)
+findCorresponding :: Map Text Text -> Set Node -> Node -> (Text, Text)
+findCorresponding corrMap toSet fromNode = undefined -- let
+  -- toPath = Path $  MultiSet.map (corrMap !) (getLocation fromNode)
+  -- toNode = findNodeWithPath toPath toSet
+  -- in (getName fromNode, name toNode)
 
-getLocation :: Node -> [Text]
-getLocation = path . location
+getLocation :: Node -> MultiSet Text
+getLocation = undefined -- path . location
 
 findNodeWithPath :: Path -> Set Node -> Node
-findNodeWithPath toPath toSet = let
-  distance = (length . path) toPath
-  eliminatedFirst = Set.dropWhileAntitone ((< distance) . length . path . location) toSet
-  eliminatedSecond = Set.takeWhileAntitone ((== distance) . length . path . location) eliminatedFirst
-  in Set.findMin $ Set.filter ((toPath ==) . location) eliminatedSecond
+findNodeWithPath toPath toSet = undefined -- let
+  -- distance = (length . path) toPath
+  -- eliminatedFirst = Set.dropWhileAntitone ((< distance) . length . path . location) toSet
+  -- eliminatedSecond = Set.takeWhileAntitone ((== distance) . length . path . location) eliminatedFirst
+  -- in Set.findMin $ Set.filter ((toPath ==) . location) eliminatedSecond
 
-getHop :: Ortho -> Set.Set String
-getHop (Ortho s) = let
-  allButOrigin = Set.deleteMin s
-  hopSet = Set.takeWhileAntitone ((== 1) . length . path . location) allButOrigin
-  in Set.fromList $ unpack . getName <$> Set.toList hopSet
+getHop :: Ortho -> Set.Set Text
+getHop (Ortho s) = undefined -- let
+  -- allButOrigin = Set.deleteMin s
+  -- hopSet = Set.takeWhileAntitone ((== 1) . length . path . location) allButOrigin
+  -- in Set.fromList $ getName <$> Set.toList hopSet

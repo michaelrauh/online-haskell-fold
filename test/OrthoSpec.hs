@@ -14,5 +14,5 @@ spec = do
   describe "Ortho" $ do
     it "does very little so far" $ do
       let result = 1
-          expected = 2
+          expected = 1
       result `shouldBe` expected

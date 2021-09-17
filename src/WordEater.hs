@@ -4,8 +4,9 @@ import Data.Set as Set ( empty, toList, Set, fromList )
 import Data.Map as Map ( findWithDefault )
 import Control.Monad ( guard )
 import Data.List ( nub )
+import Data.Text ( Text )
 
-data Answer = Answer String String String String deriving (Show)
+data Answer = Answer Text Text Text Text deriving (Show)
 
 instance Eq Answer where
     (Answer a b c d) == (Answer a' b' c' d') =
@@ -14,7 +15,7 @@ instance Eq Answer where
         (b == b' && c == c') ||
         (b == c' && c == b')
 
-wordToAnswer :: Config -> String -> [Answer]
+wordToAnswer :: Config -> Text -> [Answer]
 wordToAnswer (Config next prev _ _) d = do
     c <- Set.toList $ Map.findWithDefault Set.empty d prev
     a <- Set.toList $ Map.findWithDefault Set.empty c prev
@@ -23,5 +24,5 @@ wordToAnswer (Config next prev _ _) d = do
     guard (d == d' && b /= c)
     return (Answer a b c d)
 
-wordToUniqueAnswer :: Config -> String -> [Answer]
+wordToUniqueAnswer :: Config -> Text -> [Answer]
 wordToUniqueAnswer config word = nub $ wordToAnswer config word

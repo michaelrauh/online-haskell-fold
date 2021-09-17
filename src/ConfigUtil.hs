@@ -3,42 +3,42 @@ module ConfigUtil (makeNextMapping, makePrevMapping, makePhrases, makeVocabulary
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import Data.List (tails, inits, nub, sort)
-import Data.List.Split (splitOn)
 import Data.Char (toLower)
 import Data.Tuple (swap)
+import Data.Text ( pack, unpack, Text, filter, map, words, splitOn )
 
-makeNextMapping :: String -> Map.Map String (Set.Set String)
+makeNextMapping :: Text -> Map.Map Text (Set.Set Text)
 makeNextMapping str = foldr addWordToCorr Map.empty (clean str)
 
-makePrevMapping :: String -> Map.Map String (Set.Set String)
+makePrevMapping :: Text -> Map.Map Text (Set.Set Text)
 makePrevMapping str = foldr (addWordToCorr . swap) Map.empty (clean str)
 
-makePhrases :: String -> Set.Set [String]
+makePhrases :: Text -> Set.Set [Text]
 makePhrases input = Set.fromList $ concatMap (phrases . stripAndSplit) (toLowerSentences input)
 
-makeVocabulary :: String -> [String]
+makeVocabulary :: Text -> [Text]
 makeVocabulary = sort . nub . stripAndSplit . lower
 
-windows :: [String] -> [(String, String)]
+windows :: [Text] -> [(Text, Text)]
 windows x = zip x (drop 1 x)
 
-stripPunctuation :: String -> String
-stripPunctuation = filter (`notElem` ",.?!-:;\"\'")
+stripPunctuation :: Text -> Text
+stripPunctuation = Data.Text.filter (`notElem` ",.?!-:;\"\'")
 
-lower :: String -> String
-lower = map toLower
+lower :: Text -> Text
+lower = Data.Text.map toLower
 
-clean :: String -> [(String, String)]
+clean :: Text -> [(Text, Text)]
 clean input = concatMap (windows . stripAndSplit) (toLowerSentences input)
 
-stripAndSplit :: String -> [String]
-stripAndSplit = words . stripPunctuation
+stripAndSplit :: Text -> [Text]
+stripAndSplit = Data.Text.words . stripPunctuation
 
-addWordToCorr :: (String, String) -> Map.Map String (Set.Set String) -> Map.Map String (Set.Set String)
+addWordToCorr :: (Text, Text) -> Map.Map Text (Set.Set Text) -> Map.Map Text (Set.Set Text)
 addWordToCorr (f, s) acc = Map.unionWith Set.union acc (Map.fromList [(f, Set.singleton s)])
 
-toLowerSentences :: String -> [String]
-toLowerSentences input = splitOn "." (lower input)
+toLowerSentences :: Text -> [Text]
+toLowerSentences input = Data.Text.splitOn (pack ".") (lower input)
 
-phrases :: [String] -> [[String]]
+phrases :: [Text] -> [[Text]]
 phrases = concatMap (tail . inits) . tails

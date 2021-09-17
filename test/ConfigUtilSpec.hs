@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module ConfigUtilSpec (spec) where
 
 import Test.Hspec ( describe, it, shouldBe, Spec )
@@ -6,10 +8,9 @@ import ConfigUtil
 
 import qualified Data.Map as Map
 import qualified Data.Set as Set
+import Data.Text(Text, pack)
 
-{-# ANN module "HLint: ignore Redundant do" #-}
-
-inputString = "First, second. Third - fourth\nfifth. first third"
+inputString = pack "First, second. Third - fourth\nfifth. first third"
 
 spec :: Spec
 spec = do
