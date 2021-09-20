@@ -15,7 +15,7 @@ data Node = Node
   { name :: Text,
     location :: Path
   } deriving (Eq, Show)
-newtype Ortho = Ortho {nodes :: Set.Set Node} deriving (Eq)
+newtype Ortho = Ortho {nodes :: Set.Set Node} deriving (Eq, Show)
 data DirectedOrtho = DirectedOrtho {ortho :: ShiftedOrtho, combineAxis :: Text}
 newtype ShiftedOrtho = ShiftedOrtho Ortho
 newtype Dims = Dims (MultiSet.MultiSet Int) deriving (Eq, Ord)
@@ -27,17 +27,20 @@ instance Ord Ortho where
     -- in if dimsComp /= EQ then dimsComp else originComp
 
 instance Ord Node where
-  compare = undefined -- compare `on` length . path . location
+  compare a b = let 
+    distComp = (compare `on` length . path . location) a b 
+    nameComp = (compare `on` name) a b 
+    in if distComp /= EQ then distComp else nameComp
 
 getDims :: Ortho -> Dims
 getDims = undefined
 
 fromAnswer :: Answer -> Ortho
-fromAnswer (Answer a b c d) = undefined -- Ortho $ Set.fromList
-  -- [Node a $ Path MultiSet.empty,
-  --  Node b $ Path $ MultiSet.singleton b,
-  --  Node c $ Path $ MultiSet.singleton c,
-  --  Node d $ Path $ MultiSet.fromList [b, c]]
+fromAnswer (Answer a b c d) = Ortho $ Set.fromList
+  [Node a $ Path MultiSet.empty,
+   Node b $ Path $ MultiSet.singleton b,
+   Node c $ Path $ MultiSet.singleton c,
+   Node d $ Path $ MultiSet.fromList [b, c]]
 
 isNotBase :: Ortho -> Bool
 isNotBase (Ortho s) = undefined -- let

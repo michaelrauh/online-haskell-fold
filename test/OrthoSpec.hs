@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module OrthoSpec (spec) where
 
 import Config (makeConfig)
@@ -5,14 +7,12 @@ import qualified Data.Map as Map
 import qualified Data.Set as Set
 import Test.Hspec (Spec, describe, it, shouldBe)
 import Ortho
-
-{-# ANN module "HLint: ignore Redundant do" #-}
-{-# ANN module "HLint: ignore Reduce duplication" #-}
+import WordEater
 
 spec :: Spec
 spec = do
   describe "Ortho" $ do
-    it "does very little so far" $ do
-      let result = 1
-          expected = 1
-      result `shouldBe` expected
+    it "is equal if the middle is switched" $ do
+      let left = fromAnswer $ Answer "a" "b" "c" "d"
+          right = fromAnswer $ Answer "a" "c" "b" "d"
+      left `shouldBe` right

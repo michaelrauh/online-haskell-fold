@@ -10,6 +10,7 @@ import qualified Data.Map as Map
 import qualified Data.Set as Set
 import Data.Text(Text, pack)
 
+inputString :: Text
 inputString = pack "First, second. Third - fourth\nfifth. first third"
 
 spec :: Spec
