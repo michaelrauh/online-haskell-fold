@@ -1,7 +1,6 @@
 module Fold where
 import Orthos
     ( DirectedOrthos,
-      Correspondence(Correspondence, toOrtho),
       Orthos,
       mergeOrthos,
       fromList,
@@ -16,6 +15,7 @@ import Config ( Config(vocab, next) )
 import Ortho
     ( Ortho,
       Node,
+      Correspondence(Correspondence, toOrtho),
       getDims,
       fromAnswer,
       isNotBase,

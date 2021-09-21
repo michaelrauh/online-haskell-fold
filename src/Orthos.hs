@@ -28,7 +28,6 @@ data SubOrthos = SubOrthos Origins Hops
 data FullOrthos = FullOrthos Origins Hops
 newtype Origins = Origins (Set.Set Ortho)
 newtype Hops = Hops (Set.Set FocusedHop)
-data Correspondence = Correspondence {fromOrtho :: Ortho, toOrtho :: Ortho, corr :: [(Text, Text)]}
 newtype DirectedOrthos = DirectedOrthos (Set.Set DirectedOrtho)
 data FocusedHop = FocusedHop Text Ortho deriving (Eq)
 

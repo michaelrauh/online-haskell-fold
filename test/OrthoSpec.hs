@@ -23,4 +23,5 @@ spec = do
     it "merges two orthos in an up direction" $ do
       let left = fromAnswer $ Answer "a" "b" "c" "d"
           right = fromAnswer $ Answer "e" "f" "g" "h"
-      makePretty (mergeUp left right) `shouldBe` show [["a"], ["b", "c", "e"], ["d", "f", "g"], ["h"]]
+          corr = (Correspondence left right (Map.fromList [("a", "e"), ("b", "f"), ("c", "g"), ("d", "h")]))
+      makePretty (mergeUp corr) `shouldBe` show [["a"], ["b", "c", "e"], ["d", "f", "g"], ["h"]]

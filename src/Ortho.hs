@@ -1,5 +1,5 @@
 module Ortho where
-import Data.Set as Set ( filter, findMin, fromList, toList, Set, lookupMax, findMax, dropWhileAntitone, takeWhileAntitone, empty, deleteMin, toAscList )
+import Data.Set as Set ( filter, findMin, fromList, toList, Set, lookupMax, findMax, dropWhileAntitone, takeWhileAntitone, empty, deleteMin, toAscList, map, union )
 import Data.Map as Map ( (!), fromList, Map )
 import WordEater (Answer(..) )
 import Data.Function (on)
@@ -8,7 +8,7 @@ import Data.List (delete, sort, maximumBy, nub, groupBy, permutations)
 import Data.Text ( Text )
 import Data.Hashable ( Hashable(hashWithSalt) )
 import Data.MultiSet as MultiSet
-    ( distinctSize, empty, fromList, map, singleton, size, MultiSet, toList )
+    ( distinctSize, empty, fromList, map, singleton, size, MultiSet, toList, insert )
 
 newtype Path = Path {path :: MultiSet.MultiSet Text} deriving (Eq, Ord, Show)
 data Node = Node
@@ -19,12 +19,24 @@ newtype Ortho = Ortho {nodes :: Set.Set Node} deriving (Eq, Show)
 data DirectedOrtho = DirectedOrtho {ortho :: ShiftedOrtho, combineAxis :: Text}
 newtype ShiftedOrtho = ShiftedOrtho Ortho
 newtype Dims = Dims (MultiSet.MultiSet Int) deriving (Eq, Ord)
+data Correspondence = Correspondence {fromOrtho :: Ortho, toOrtho :: Ortho, corr :: Map.Map Text Text}
 
 makePretty :: Ortho -> String
 makePretty (Ortho o)= show ((fmap . fmap) name (groupBy ((==) `on` locationLength) (Set.toAscList o)))
 
-mergeUp :: Ortho -> Ortho -> Ortho 
-mergeUp = undefined
+mergeUp :: Correspondence -> Ortho
+mergeUp (Correspondence (Ortho f) to@(Ortho t) corr) = let
+  mappedTo = Set.map (mapPaths corr) t
+  pushedBack = Set.map (insertIntoPath (name $ getOrigin to)) t
+  in Ortho $ Set.union pushedBack f
+
+insertIntoPath :: Text -> Node -> Node
+insertIntoPath toInsert (Node name (Path l))= Node name $ Path $ MultiSet.insert name l
+
+mapPaths :: Map Text Text -> Node -> Node
+mapPaths corr (Node name (Path location)) = let 
+  locations = MultiSet.map (corr Map.!) location
+  in Node name (Path locations) 
 
 instance Ord Ortho where
   compare a b = undefined -- let
@@ -33,9 +45,9 @@ instance Ord Ortho where
     -- in if dimsComp /= EQ then dimsComp else originComp
 
 instance Ord Node where
-  compare a b = let 
-    distComp = (compare `on` length . path . location) a b 
-    nameComp = (compare `on` name) a b 
+  compare a b = let
+    distComp = (compare `on` length . path . location) a b
+    nameComp = (compare `on` name) a b
     in if distComp /= EQ then distComp else nameComp
 
 getDims :: Ortho -> Dims
