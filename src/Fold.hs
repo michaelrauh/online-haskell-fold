@@ -89,13 +89,13 @@ combineUpRight :: Config -> Orthos -> Ortho -> Orthos
 combineUpRight c os o = undefined
   -- let projects = projectsBackward c os o
   --     found = diagonalsLeft projects o
-  --  in filterOld os found
+  --  in filterOld os found -- todo this is missing the step where the orthos are merged
 
 combineUpLeft :: Config -> Orthos -> Ortho -> Orthos
 combineUpLeft c os o = undefined
   -- let projects = projectsForward c os o
   --     found = diagonalsRight projects o
-  --  in filterOld os found
+  --  in filterOld os found -- todo this is missing the step where the orthos are merged
 
 projectsForward :: Config -> Orthos -> Ortho -> Orthos
 projectsForward c os o = undefined

@@ -1,5 +1,5 @@
 module Ortho where
-import Data.Set as Set ( filter, findMin, fromList, toList, Set, lookupMax, findMax, dropWhileAntitone, takeWhileAntitone, empty, deleteMin )
+import Data.Set as Set ( filter, findMin, fromList, toList, Set, lookupMax, findMax, dropWhileAntitone, takeWhileAntitone, empty, deleteMin, toAscList )
 import Data.Map as Map ( (!), fromList, Map )
 import WordEater (Answer(..) )
 import Data.Function (on)
@@ -8,7 +8,7 @@ import Data.List (delete, sort, maximumBy, nub, groupBy, permutations)
 import Data.Text ( Text )
 import Data.Hashable ( Hashable(hashWithSalt) )
 import Data.MultiSet as MultiSet
-    ( distinctSize, empty, fromList, map, singleton, size, MultiSet )
+    ( distinctSize, empty, fromList, map, singleton, size, MultiSet, toList )
 
 newtype Path = Path {path :: MultiSet.MultiSet Text} deriving (Eq, Ord, Show)
 data Node = Node
@@ -19,6 +19,12 @@ newtype Ortho = Ortho {nodes :: Set.Set Node} deriving (Eq, Show)
 data DirectedOrtho = DirectedOrtho {ortho :: ShiftedOrtho, combineAxis :: Text}
 newtype ShiftedOrtho = ShiftedOrtho Ortho
 newtype Dims = Dims (MultiSet.MultiSet Int) deriving (Eq, Ord)
+
+makePretty :: Ortho -> String
+makePretty (Ortho o)= show ((fmap . fmap) name (groupBy ((==) `on` locationLength) (Set.toAscList o)))
+
+mergeUp :: Ortho -> Ortho -> Ortho 
+mergeUp = undefined
 
 instance Ord Ortho where
   compare a b = undefined -- let
@@ -48,7 +54,7 @@ isNotBase (Ortho s) = undefined -- let
   -- in MultiSet.distinctSize underlying /= MultiSet.size underlying
 
 locationLength :: Node -> Int
-locationLength (Node _ (Path l)) = undefined --  Prelude.length l
+locationLength (Node _ (Path l)) = length . MultiSet.toList $ l
 
 getName :: Node -> Text
 getName = name
