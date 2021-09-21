@@ -9,6 +9,7 @@ import Data.Text ( Text )
 import Data.Hashable ( Hashable(hashWithSalt) )
 import Data.MultiSet as MultiSet
     ( distinctSize, empty, fromList, map, singleton, size, MultiSet, toList, insert )
+import Data.Tuple
 
 newtype Path = Path {path :: MultiSet.MultiSet Text} deriving (Eq, Ord, Show)
 data Node = Node
@@ -19,15 +20,16 @@ newtype Ortho = Ortho {nodes :: Set.Set Node} deriving (Eq, Show)
 data DirectedOrtho = DirectedOrtho {ortho :: ShiftedOrtho, combineAxis :: Text}
 newtype ShiftedOrtho = ShiftedOrtho Ortho
 newtype Dims = Dims (MultiSet.MultiSet Int) deriving (Eq, Ord)
-data Correspondence = Correspondence {fromOrtho :: Ortho, toOrtho :: Ortho, corr :: Map.Map Text Text}
+data Correspondence = Correspondence {fromOrtho :: Ortho, toOrtho :: Ortho, corr :: [(Text, Text)]}
 
 makePretty :: Ortho -> String
 makePretty (Ortho o)= show ((fmap . fmap) name (groupBy ((==) `on` locationLength) (Set.toAscList o)))
 
 mergeUp :: Correspondence -> Ortho
 mergeUp (Correspondence (Ortho f) to@(Ortho t) corr) = let
-  mappedTo = Set.map (mapPaths corr) t
-  pushedBack = Set.map (insertIntoPath (name $ getOrigin to)) t
+  corrMap = Map.fromList $ swap <$> corr
+  mappedTo = Set.map (mapPaths corrMap) t
+  pushedBack = Set.map (insertIntoPath (name $ getOrigin to)) mappedTo
   in Ortho $ Set.union pushedBack f
 
 insertIntoPath :: Text -> Node -> Node
