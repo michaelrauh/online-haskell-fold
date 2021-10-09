@@ -22,7 +22,7 @@ newtype ShiftedOrtho = ShiftedOrtho Ortho
 newtype Dims = Dims (MultiSet.MultiSet Int) deriving (Eq, Ord)
 data Correspondence = Correspondence {fromOrtho :: Ortho, toOrtho :: Ortho, corr :: [(Text, Text)]}
 
-makePretty :: Ortho -> String
+makePretty :: Ortho -> String -- make this less lossy
 makePretty (Ortho o)= show ((fmap . fmap) name (groupBy ((==) `on` locationLength) (Set.toAscList o)))
 
 mergeUp :: Correspondence -> Ortho
